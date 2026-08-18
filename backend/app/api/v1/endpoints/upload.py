@@ -8,7 +8,7 @@ from app.core.database import get_db
 from app.models.document import Document
 from app.schemas.document import DocumentResponse
 from app.services.storage.minio import storage
-
+from io import BytesIO
 
 router = APIRouter()
 
@@ -84,8 +84,8 @@ async def upload_file(
         from io import BytesIO
 
         storage.upload(
-            file_data=BytesIO(file_data),
-            object_name=storage_key,
+            file_object=BytesIO(file_data),
+            object_key=storage_key,
             content_type=content_type,
             size=size_bytes,
         )
