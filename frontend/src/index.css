@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border-light dark:border-border-dark;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-canvas-light dark:bg-canvas-dark text-ink-light dark:text-ink-dark font-sans antialiased;
+    transition: background-color 0.3s ease;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-border-light dark:bg-border-dark rounded-full;
+  }
+  .accent-gradient {
+    background-image: linear-gradient(135deg, #7c5cff, #22d3ee);
+  }
+  .accent-gradient-text {
+    background-image: linear-gradient(135deg, #7c5cff, #22d3ee);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}

@@ -1,0 +1,53 @@
+# LiteLLM proxy config.
+#
+# Run the proxy with:
+#   litellm --config litellm_config.yaml --port 4000
+#
+# vLLM must already be serving on port 8001 (see README for the launch
+# command). LiteLLM exposes an OpenAI-compatible API on port 4000 that
+# the FastAPI backend talks to — this is the layer that lets you add a
+# second/fallback model later by adding another entry below, with zero
+# changes to backend/app code.
+
+# model_list:
+#   - model_name: local-llama3
+#     litellm_params:
+#       model: openai/meta-llama/Meta-Llama-3.1-8B-Instruct
+#       api_base: http://localhost:8001/v1
+#       api_key: "not-needed-for-local-vllm"
+
+#   # Example of a hosted fallback model — uncomment and set OPENAI_API_KEY
+#   # as an env var if you want automatic fallback for complex queries.
+#   # - model_name: gpt-4o-fallback
+#   #   litellm_params:
+#   #     model: gpt-4o
+#   #     api_key: os.environ/OPENAI_API_KEY
+
+# litellm_settings:
+#   drop_params: true
+#   set_verbose: false
+
+# general_settings:
+#   master_key: sk-local-dev-key   # must match LITELLM_API_KEY in backend/.env
+
+
+# LiteLLM proxy config (Routing to local Ollama)
+
+model_list:
+  - model_name: local-llama3
+    litellm_params:
+      # model: ollama/llama3.2:1b
+      # model: ollama/llama3.1
+      # model: ollama/llama3.1:8b
+      # model: ollama/qwen2.5:7b-instruct
+      # api_base: http://localhost:11434
+      model: groq/openai/gpt-oss-120b
+      # api_base: https://api.groq.com/v1
+      api_key: os.environ/GROQ_API_KEY
+
+litellm_settings:
+  drop_params: true
+  set_verbose: false
+
+general_settings:
+  master_key: sk-local-dev-key   # must match LITELLM_API_KEY in backend/.env

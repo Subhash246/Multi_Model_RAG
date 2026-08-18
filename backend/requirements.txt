@@ -1,0 +1,35 @@
+# --- Core web framework ---
+fastapi>=0.111.0,<0.112.0
+uvicorn[standard]>=0.22.0,<0.23.0
+python-multipart==0.0.9      # required for UploadFile / form-data parsing
+
+# --- Config & validation ---
+pydantic==2.9.2
+pydantic-settings==2.5.2
+
+# --- LLM layer ---
+openai==1.51.0                # used as the client SDK against LiteLLM's OpenAI-compatible API
+litellm[proxy]==1.48.15       # run as its own process: `litellm --config litellm_config.yaml`
+
+# --- Storage ---
+minio==7.2.9
+
+# --- Database ---
+sqlalchemy==2.0.36
+psycopg[binary]==3.2.3
+
+# vLLM is installed and run as its own server process (typically on a
+# GPU host), not imported by the FastAPI app. Install separately:
+#   pip install vllm==0.6.2
+# and launch with, e.g.:
+#   python -m vllm.entrypoints.openai.api_server \
+#       --model meta-llama/Meta-Llama-3.1-8B-Instruct --port 8001
+
+# --- Coming next milestones (uncomment as you build those pieces) ---
+# faster-whisper==1.0.3       # audio transcription
+# docling==2.4.0              # document parsing
+# psycopg[binary]==3.2.1      # PostgreSQL + pgvector
+# celery==5.4.0
+# redis==5.0.8
+# pyjwt==2.9.0
+# passlib[bcrypt]==1.7.4
