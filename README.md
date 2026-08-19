@@ -157,3 +157,13 @@ Open the **repo root** (`multimodal-rag-platform/`) as the workspace so
 Cursor's indexing and search span both `backend/` and `frontend/`
 together — most changes (e.g. adding an endpoint + wiring it into
 `lib/api.ts`) touch both sides at once.
+
+
+$env:DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/multimodal_rag"
+echo $env:DATABASE_URL
+
+
+
+
+
+"C:\Users\subha\Downloads\minio.exe" server "C:\minio\data" --console-address ":9001"

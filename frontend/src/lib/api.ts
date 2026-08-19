@@ -121,3 +121,25 @@ export async function uploadFile(
 
   return response.json() as Promise<Attachment>;
 }
+
+export async function processDocument(
+  fileId: string
+) {
+  const response = await fetch(
+    `/api/v1/documents/${fileId}/process`,
+    {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to process document: ${response.status}`
+    );
+  }
+
+  return response.json();
+}

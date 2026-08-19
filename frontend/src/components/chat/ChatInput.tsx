@@ -5,7 +5,11 @@ import clsx from "clsx";
 import { useAutoResizeTextarea } from "../../hooks/useAutoResizeTextarea";
 import { useVoiceRecorder } from "../../hooks/useVoiceRecorder";
 import { uploadFile } from "../../lib/api";
-import type { Attachment } from "../../lib/types";
+
+import type {
+  Attachment,
+  PendingAttachment,
+} from "../../lib/types";
 import { AttachmentChip } from "./AttachmentChip";
 
 interface Props {
@@ -16,7 +20,7 @@ interface Props {
 
 export function ChatInput({ onSend, isStreaming, onStop }: Props) {
   const [text, setText] = useState("");
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useAutoResizeTextarea(text);
@@ -24,11 +28,58 @@ export function ChatInput({ onSend, isStreaming, onStop }: Props) {
 
   const canSend = (text.trim().length > 0 || attachments.length > 0) && !isStreaming && !isUploading;
 
-  function handleSend() {
-    if (!canSend) return;
-    onSend(text, attachments);
-    setText("");
-    setAttachments([]);
+  async function handleSend() {
+    if (!canSend) {
+      return;
+    }
+  
+    setIsUploading(true);
+  
+    try {
+      // --------------------------------------------------
+      // 1. Upload selected files
+      // --------------------------------------------------
+  
+      const uploadedAttachments: Attachment[] =
+        await Promise.all(
+          attachments.map(
+            (attachment) =>
+              uploadFile(attachment.file)
+          )
+        );
+  
+      // --------------------------------------------------
+      // 2. Process uploaded documents
+      // --------------------------------------------------
+  
+  
+      // --------------------------------------------------
+      // 3. Now send the chat message
+      // --------------------------------------------------
+  
+      onSend(
+        text,
+        uploadedAttachments
+      );
+  
+      // --------------------------------------------------
+      // 4. Clear composer
+      // --------------------------------------------------
+  
+      setText("");
+      setAttachments([]);
+  
+    } catch (error) {
+      console.error(
+        "Failed to upload/process attachment:",
+        error
+      );
+  
+      // Keep attachments visible so the user
+      // can retry instead of silently losing them.
+    } finally {
+      setIsUploading(false);
+    }
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
@@ -38,34 +89,60 @@ export function ChatInput({ onSend, isStreaming, onStop }: Props) {
     }
   }
 
-  async function handleFilesSelected(e: ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? []);
-    e.target.value = ""; // allow re-selecting the same file later
-    if (files.length === 0) return;
-
-    setIsUploading(true);
-    try {
-      const uploaded = await Promise.all(files.map(uploadFile));
-      setAttachments((prev) => [...prev, ...uploaded]);
-    } catch {
-      // Non-fatal: surface nothing intrusive, just skip the failed files.
-    } finally {
-      setIsUploading(false);
+  function handleFilesSelected(
+    e: ChangeEvent<HTMLInputElement>
+  ) {
+    const files = Array.from(
+      e.target.files ?? []
+    );
+  
+    e.target.value = "";
+  
+    if (files.length === 0) {
+      return;
     }
+  
+    const pendingFiles: PendingAttachment[] =
+      files.map((file) => ({
+        local_id: crypto.randomUUID(),
+        file,
+        filename: file.name,
+        content_type:
+          file.type || "application/octet-stream",
+        size_bytes: file.size,
+      }));
+  
+    setAttachments((prev) => [
+      ...prev,
+      ...pendingFiles,
+    ]);
   }
 
   async function handleMicClick() {
     if (isRecording) {
       const blob = await stop();
+  
       if (blob) {
-        setIsUploading(true);
-        try {
-          const file = new File([blob], `voice-note-${Date.now()}.webm`, { type: "audio/webm" });
-          const uploaded = await uploadFile(file);
-          setAttachments((prev) => [...prev, uploaded]);
-        } finally {
-          setIsUploading(false);
-        }
+        const file = new File(
+          [blob],
+          `voice-note-${Date.now()}.webm`,
+          {
+            type: "audio/webm",
+          }
+        );
+  
+        const pendingAttachment: PendingAttachment = {
+          local_id: crypto.randomUUID(),
+          file,
+          filename: file.name,
+          content_type: file.type,
+          size_bytes: file.size,
+        };
+  
+        setAttachments((prev) => [
+          ...prev,
+          pendingAttachment,
+        ]);
       }
     } else {
       start();
@@ -89,9 +166,9 @@ export function ChatInput({ onSend, isStreaming, onStop }: Props) {
             <div className="flex flex-wrap gap-1.5 px-1 pt-0.5">
               {attachments.map((a) => (
                 <AttachmentChip
-                  key={a.file_id}
+                  key={a.local_id}
                   attachment={a}
-                  onRemove={() => setAttachments((prev) => prev.filter((x) => x.file_id !== a.file_id))}
+                  onRemove={() => setAttachments((prev) => prev.filter((x) => x.local_id !== a.local_id))}
                 />
               ))}
             </div>

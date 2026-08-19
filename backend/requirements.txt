@@ -18,6 +18,8 @@ minio==7.2.9
 sqlalchemy==2.0.36
 psycopg[binary]==3.2.3
 
+pypdf==5.9.0
+
 # vLLM is installed and run as its own server process (typically on a
 # GPU host), not imported by the FastAPI app. Install separately:
 #   pip install vllm==0.6.2

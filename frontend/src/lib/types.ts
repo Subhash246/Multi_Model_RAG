@@ -15,3 +15,11 @@ export interface ChatMessage {
   attachments?: Attachment[];
   isStreaming?: boolean;
 }
+
+export interface PendingAttachment {
+  local_id: string;
+  file: File;
+  filename: string;
+  content_type: string;
+  size_bytes: number;
+}
