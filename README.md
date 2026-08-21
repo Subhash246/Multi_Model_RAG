@@ -162,8 +162,10 @@ together — most changes (e.g. adding an endpoint + wiring it into
 $env:DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/multimodal_rag"
 echo $env:DATABASE_URL
 
-
-
-
+git status  
+git add .  
+git commit -m ""
+git push origin main
 
 "C:\Users\subha\Downloads\minio.exe" server "C:\minio\data" --console-address ":9001"
+
