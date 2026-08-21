@@ -12,3 +12,14 @@ def db():
     finally:
         session.rollback()
         session.close()
+
+def override_db():
+    from app.core.database import SessionLocal
+
+    db = SessionLocal()
+
+    try:
+        yield db
+    finally:
+        db.rollback()
+        db.close()

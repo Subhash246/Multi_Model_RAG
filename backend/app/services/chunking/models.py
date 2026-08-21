@@ -21,7 +21,8 @@ class DocumentChunk:
     chunk_id: str
     document_id: str
     content: str
-
+    tenant_id: str
+    access_tags: list[str] = field(default_factory=list)
     chunk_type: str = "page"
 
     parent_id: str | None = None

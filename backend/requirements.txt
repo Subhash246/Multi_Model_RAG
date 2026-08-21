@@ -17,15 +17,12 @@ minio==7.2.9
 # --- Database ---
 sqlalchemy==2.0.36
 psycopg[binary]==3.2.3
+pgvector
+alembic
 
 pypdf==5.9.0
 
-# vLLM is installed and run as its own server process (typically on a
-# GPU host), not imported by the FastAPI app. Install separately:
-#   pip install vllm==0.6.2
-# and launch with, e.g.:
-#   python -m vllm.entrypoints.openai.api_server \
-#       --model meta-llama/Meta-Llama-3.1-8B-Instruct --port 8001
+
 
 # --- Coming next milestones (uncomment as you build those pieces) ---
 # faster-whisper==1.0.3       # audio transcription

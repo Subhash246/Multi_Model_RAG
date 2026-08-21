@@ -9,6 +9,8 @@ def test_pii_service_processes_chunk():
         chunk_id="chunk-1",
         document_id="document-1",
         content="Employee information.",
+        tenant_id="default",
+        access_tags=["public"],
         page_start=1,
         page_end=1,
         metadata={

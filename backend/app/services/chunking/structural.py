@@ -32,10 +32,16 @@ class StructuralChunker(BaseChunker):
             chunk = DocumentChunk(
                 chunk_id=str(uuid4()),
                 document_id=document.document_id,
+                tenant_id=document.tenant_id,
                 content=page.text.strip(),
+
+                access_tags=list(document.access_tags),
+
                 chunk_type="page",
+                parent_id=None,
                 page_start=page.page_number,
                 page_end=page.page_number,
+
                 metadata={
                     "source": "parser",
                     "page_number": page.page_number,

@@ -9,6 +9,8 @@ from app.models.document import Document
 from app.schemas.document import DocumentResponse
 from app.services.storage.minio import storage
 from io import BytesIO
+from app.services.security.context import SecurityContext
+from app.services.security.dependency import get_security_context
 
 router = APIRouter()
 
@@ -37,7 +39,18 @@ ALLOWED_CONTENT_TYPES = {
 async def upload_file(
     file: UploadFile,
     db: Session = Depends(get_db),
-):
+    security_context: SecurityContext = Depends(
+        get_security_context
+    ),
+):  
+
+
+    if "document:write" not in security_context.permissions:
+        raise HTTPException(
+            status_code=403,
+            detail="You are not authorized to upload documents.",
+        )
+
     if not file.filename:
         raise HTTPException(
             status_code=400,
@@ -81,7 +94,7 @@ async def upload_file(
         )
 
     try:
-        from io import BytesIO
+        # from io import BytesIO
 
         storage.upload(
             file_object=BytesIO(file_data),
@@ -92,6 +105,7 @@ async def upload_file(
 
         document = Document(
             id=file_id,
+            tenant_id=security_context.tenant_id,
             filename=file.filename,
             content_type=content_type,
             size_bytes=size_bytes,
@@ -124,3 +138,4 @@ async def upload_file(
             status_code=500,
             detail="Failed to store uploaded file.",
         ) from exc
+

@@ -6,6 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 from typing import TYPE_CHECKING
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 
 if TYPE_CHECKING:
     from app.models.document import Document
@@ -16,6 +17,18 @@ class Chunk(Base):
     id: Mapped[str] = mapped_column(
         String(36),
         primary_key=True,
+    )
+
+    tenant_id: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+        index=True,
+    )
+
+    access_tags: Mapped[list[str]] = mapped_column(
+        ARRAY(String),
+        nullable=False,
+        default=list,
     )
 
     document_id: Mapped[str] = mapped_column(

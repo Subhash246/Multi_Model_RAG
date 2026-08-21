@@ -7,7 +7,7 @@ from app.services.parsing.models import (
 )
 from app.services.pii.noop import NoOpPIIProvider
 from app.services.pii.service import PIIProcessingService
-
+from app.services.security.context import SecurityContext
 
 class FakeStorage:
 
@@ -55,6 +55,12 @@ class FakeChunkRepository:
         self.created_chunks.extend(chunks)
         return chunks
 
+class FakeIndexingService:
+    def __init__(self):
+        self.indexed_chunks = []
+
+    def index_chunks(self, chunks):
+        self.indexed_chunks.extend(chunks)
 
 def test_ingestion_service_parses_chunks_processes_pii_and_persists():
 
@@ -63,6 +69,7 @@ def test_ingestion_service_parses_chunks_processes_pii_and_persists():
     pii_service = PIIProcessingService(
         provider=NoOpPIIProvider()
     )
+    indexing_service = FakeIndexingService()
 
     service = DocumentIngestionService(
         storage=FakeStorage(),
@@ -70,12 +77,14 @@ def test_ingestion_service_parses_chunks_processes_pii_and_persists():
         chunker=StructuralChunker(),
         pii_service=pii_service,
         chunk_repository=repository,
+        indexing_service=indexing_service,
     )
 
     from app.models.document import Document
 
     document = Document(
         id="document-123",
+        tenant_id="default",
         filename="test.pdf",
         content_type="application/pdf",
         size_bytes=100,
@@ -83,8 +92,16 @@ def test_ingestion_service_parses_chunks_processes_pii_and_persists():
         status="uploaded",
     )
 
+    security_context = SecurityContext(
+        tenant_id="default",
+        user_id="test-user",
+        roles=["user"],
+        permissions=["document:write"],
+    )
+
     result = service.process_document(
         document=document,
+        security_context=security_context,
     )
 
     assert isinstance(result, ChunkedDocument)
@@ -107,3 +124,5 @@ def test_ingestion_service_parses_chunks_processes_pii_and_persists():
 
     # Processed chunks were persisted
     assert len(repository.created_chunks) == 2
+    assert indexing_service.indexed_chunks[0].chunk_id == result.chunks[0].chunk_id
+    assert indexing_service.indexed_chunks[1].chunk_id == result.chunks[1].chunk_id

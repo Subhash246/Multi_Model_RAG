@@ -14,6 +14,12 @@ class Document(Base):
         primary_key=True,
     )
 
+    tenant_id: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+        index=True,
+    )
+    
     filename: Mapped[str] = mapped_column(
         String(255),
         nullable=False,
